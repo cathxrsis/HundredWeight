@@ -42,3 +42,43 @@ constructMethod = do
 	i <- ParsePlace a
 	j <- Change i Rounds $ b 
 
+
+
+
+
+
+
+
+a = [3,4,5,6,7,8]
+
+head a --3
+
+tail a --[4,5,6,7,8]
+
+head tail tail tail
+
+cons :: a -> [a] -> [a]
+cons x [y] = [x, y]
+
+(:) :: a -> [a] -> [a]
+x : [y] = [x,y]
+
+plus :: Num -> Num -> Num
+plus a b = a + b
+
+c = plus 4
+
+c 5 --=> 9 
+
+
+
+
+
+
+
+
+
+
+
+
+
