@@ -20,6 +20,7 @@ minAbs :: [Int] -> Int
 minAbs (x:[]) = x
 minAbs (x:y:xs)
    | (abs x) <= (abs y) = x
+   | (abs y) <= (abs x) = y
    | otherwise          = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
