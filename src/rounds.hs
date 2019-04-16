@@ -1,5 +1,6 @@
 import Data.Char
 import Data.List
+import Text.ParserCombinators.ReadP
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -7,7 +8,7 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
--- row is a row on a blue line, as a list of bell
+-- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
 -- rounds constructs a row of bells in the same position as their number
@@ -32,15 +33,13 @@ evolve n (['x']) (Bell p q)
 evolve _ c (Bell p q)
    | (foldl (||) False (map isNumber c)) && (foldl (||) False (map (\r -> p == (digitToInt r)) c))   = Bell p q -- If the bell is one of the places, keep its position the same.
  --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
-   | (even (minAbs (map ((\r -> r-p).digitToInt) c))) && ((minAbs (map ((\r -> r-p).digitToInt) c)) > 0) || (odd (minAbs (map ((\r -> r-p).digitToInt) c))) && ((minAbs (map ((\r -> r-p).digitToInt) c)) < 0) = Bell (p+1) q
-   | (odd (minAbs (map ((\r -> r-p).digitToInt) c))) && ((minAbs (map ((\r -> r-p).digitToInt) c)) > 0) || (even (minAbs (map ((\r -> r-p).digitToInt) c))) && ((minAbs (map ((\r -> r-p).digitToInt) c)) < 0) = Bell (p-1) q
-   | otherwise                                       = Bell p q --Left "Uncaught Place Notation Error"
-
+   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
+   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
+   | otherwise                                                         = Bell p q
+   where cP = minAbs.(map ((\r -> r-p).digitToInt)) --Find the closest bell making a place to our bell
 --Requires cases for:
--- When in stage n and bell (n-odd) makes places, bell n must make places
--- When bell (1 + odd) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
-
---parsePlace :: Int -> String -> [String]
+-- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
+-- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
 
 -- Generate a list of bells from a row
 change :: Int -> String -> Row -> Row
@@ -70,7 +69,7 @@ stage 12 = "Maximus"
 stage 13 = "Sextuples"
 stage x = "Stage " ++ show x
 
--- 
+-- A bell is represented as its symbol
 charBell :: Bell -> Char
 charBell (Bell _ b) =  intToDigit b
 
@@ -78,8 +77,28 @@ charBell (Bell _ b) =  intToDigit b
 printRow :: Row -> String
 printRow r = ((map charBell) $ sort r) ++ ['\n']
 
+-- Print each bell of the method
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
+
+-- Work out if this is valid place notation
+isPlaceNotation :: Char -> Bool
+isPlaceNotation char = any (char ==) "1234567890xX-.,"
+
+-- Parser Requirements:
+-- pNParse :: Int -> String -> [String]
+--  on numbers:
+--    number <= stage = add to string
+--    otherwise fail
+--  on 'x/X':
+--    end string and add "x" to listP
+--  on '.':
+--    end string, begin new one in listP
+--  on ',':
+--    end string, ++ reverse of listP onto listP then begin new on in listP
+--  on [] :
+--    end parse
+
 
 --Features to do
 -- Parser needs to parse changes into full notation
@@ -88,4 +107,3 @@ printMethod m = foldl (++) [] (map printRow m)
 -- Allow for composing blocks of place notation
 -- Allow for bob, single, plain and more exciting blocks
 -- Allow for block composition
-
