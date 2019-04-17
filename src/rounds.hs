@@ -1,6 +1,5 @@
 import Data.Char
 import Data.List
-import Text.ParserCombinators.ReadP
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -10,6 +9,8 @@ instance Eq Bell where
 
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
+-- Places is a list of strings that each represent the notation for a change
+type Places = [String]
 
 -- rounds constructs a row of bells in the same position as their number
 rounds :: Int -> Row
@@ -22,16 +23,16 @@ minAbs (x:[]) = x
 minAbs (x:y:xs)
    | (abs x) <= (abs y) = x
    | (abs y) <= (abs x) = y
-   | otherwise          = minAbs xs
+   | otherwise = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
 evolve :: Int -> String -> Bell -> Bell
-evolve _ [] (Bell p q)                               = Bell p q
+evolve _ [] (Bell p q) = Bell p q
 evolve n (['x']) (Bell p q)
-   | odd p                                           = Bell (p+1) q
-   | otherwise                                       = Bell (p-1) q
+   | odd p = Bell (p+1) q
+   | otherwise = Bell (p-1) q
 evolve _ c (Bell p q)
-   | (foldl (||) False (map isNumber c)) && (foldl (||) False (map (\r -> p == (digitToInt r)) c))   = Bell p q -- If the bell is one of the places, keep its position the same.
+   | (foldl (||) False (map isNumber c)) && (foldl (||) False (map (\r -> p == (digitToInt r)) c)) = Bell p q -- If the bell is one of the places, keep its position the same.
  --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
@@ -46,12 +47,12 @@ change :: Int -> String -> Row -> Row
 change n s r = map (evolve n s) r
 
 -- Generate non rounds method
-methodNon :: Int -> [String] -> Row -> [Row]
+methodNon :: Int -> Places -> Row -> [Row]
 methodNon n [] r = []
 methodNon n (p:ps) r = (change n p r) : methodNon n ps (change n p r)
 
 -- Start from rounds
-method :: Int -> [String] -> [Row]
+method :: Int -> Places -> [Row]
 method a b = (methodNon a b) $ (rounds a)
 
 stage :: Int -> String
@@ -81,9 +82,20 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
+dePalindrome :: Places -> Places
+
+--parsePlace :: String -> [String]
+--parsePlace []       = []
+--parsePlace ('.':ss) = [] : (parsePlace ss)
+--parsePlace ('x':ss) =
+--parsePlace ('X':ss) =
+--parsePlace ('-':ss) =
 -- Work out if this is valid place notation
-isPlaceNotation :: Char -> Bool
-isPlaceNotation char = any (char ==) "1234567890xX-.,"
+--isPlaceNotation :: Char -> Bool
+--isPlaceNotation char = any (char ==) "1234567890xX-.,"
+
+--placeNotation = ReadP [String]
+--placeNotation = do
 
 -- Parser Requirements:
 -- pNParse :: Int -> String -> [String]
