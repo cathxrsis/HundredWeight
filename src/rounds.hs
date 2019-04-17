@@ -32,12 +32,14 @@ evolve n (['x']) (Bell p q)
    | odd p = Bell (p+1) q
    | otherwise = Bell (p-1) q
 evolve _ c (Bell p q)
-   | (foldl (||) False (map isNumber c)) && (foldl (||) False (map (\r -> p == (digitToInt r)) c)) = Bell p q -- If the bell is one of the places, keep its position the same.
+   | (foldOr isNumber c) && (foldOr sameP c) = Bell p q -- If the bell is one of the places, keep its position the same.
  --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
    | otherwise                                                         = Bell p q
    where cP = minAbs.(map ((\r -> r-p).digitToInt)) --Find the closest bell making a place to our bell
+   where foldOr = foldl (||) False (\f r -> map f r)
+   where sameP = (\r -> p == (digitToInt r))
 --Requires cases for:
 -- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
 -- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
