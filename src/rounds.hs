@@ -1,5 +1,6 @@
 import Data.Char
 import Data.List
+import Parsec
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -38,8 +39,8 @@ evolve _ c (Bell p q)
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
    | otherwise                                                         = Bell p q
    where cP = minAbs.(map ((\r -> r-p).digitToInt)) --Find the closest bell making a place to our bell
-   where foldOr = foldl (||) False (\f r -> map f r)
-   where sameP = (\r -> p == (digitToInt r))
+         foldOr = foldl (||) False (\f r -> map f r)
+         sameP = (\r -> p == (digitToInt r))
 --Requires cases for:
 -- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
 -- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
