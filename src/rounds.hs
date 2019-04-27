@@ -85,7 +85,7 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
-dePalindrome :: Places -> Places
+
 
 --parsePlace :: String -> [String]
 --parsePlace []       = []
