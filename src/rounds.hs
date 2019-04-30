@@ -88,7 +88,9 @@ printMethod m = foldl (++) [] (map printRow m)
 
 parsePlace :: String -> PlaceNotation 
 
-chompStr :: String -> (Char, String)
+chompStr :: String -> Maybe (Char, String)
+compStr [] = Nothing
+chompStr s:ss = Just (s, ss)
 
 lexPlace :: Char -> Maybe Call
 lexPlace 'x' = Just X
