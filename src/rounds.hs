@@ -1,6 +1,5 @@
 import Data.Char
 import Data.List
-import Parsec
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -30,16 +29,17 @@ minAbs (x:y:xs)
    | otherwise = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: Int -> Call -> Bell -> Bell
+evolve :: Int -> Call -> Bell -> Maybe Bell
 evolve n X (Bell p q)
-   | odd p = Bell (p+1) q
-   | otherwise = Bell (p-1) q
+   | odd n = Nothing
+   | odd p =  Just $ Bell (p+1) q
+   | otherwise = Just $ Bell (p-1) q
 evolve _ (Change c) (Bell p q)
-   | (foldOr $ map (\r -> r == p) c) = Bell p q -- If the bell is one of the places, keep its position the same.
+   | (foldOr $ map (\r -> r == p) c) = Just $ Bell p q -- If the bell is one of the places, keep its position the same.
  --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
-   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
-   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
-   | otherwise                                                         = Bell p q
+   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
+   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
+   | otherwise = Just $ Bell p q
    where cP = minAbs.(map (\r -> r-p)) --Find the closest bell making a place to our bell
          foldOr = foldl (||) False
 --Requires cases for:
@@ -86,7 +86,25 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
---parsePlace :: String -> [String]
+parsePlace :: String -> PlaceNotation 
+
+chompStr :: String -> (Char, String)
+
+lexPlace :: Char -> Maybe Call
+lexPlace 'x' = Just X
+lexPlace 'X' = Just X
+lexPlace '-' = Just X
+lexPlace p
+  | isNumber p = Just Call [toDigit p] 
+  | otherwise = Nothing
+
+data Palindrome = Palindrome
+data PlaceNotation = Call | Palindrome
+-- Must cope with numbers above 10 (0)
+ 
+lexPalindrome :: Char -> Maybe Palindrome
+lexPalindrome ',' = Palindrome
+lexPalindrome _ = Nothing
 --parsePlace []       = []
 --parsePlace ('.':ss) = [] : (parsePlace ss)
 --parsePlace ('x':ss) =
