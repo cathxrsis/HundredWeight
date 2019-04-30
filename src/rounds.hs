@@ -8,6 +8,9 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
+-- Change represents the set of bells that are to be changed.
+data Call = X | Change [Int] 
+
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 -- Places is a list of strings that each represent the notation for a change
@@ -27,12 +30,11 @@ minAbs (x:y:xs)
    | otherwise = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: Int -> String -> Bell -> Bell
-evolve _ [] (Bell p q) = Bell p q
-evolve n (['x']) (Bell p q)
+evolve :: Int -> Change -> Bell -> Bell
+evolve n X (Bell p q)
    | odd p = Bell (p+1) q
    | otherwise = Bell (p-1) q
-evolve _ c (Bell p q)
+evolve _ (Change c) (Bell p q)
    | (foldOr $ map isNumber c) && (foldOr $ map sameP c) = Bell p q -- If the bell is one of the places, keep its position the same.
  --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
@@ -84,8 +86,6 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 -- Print each bell of the method
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
-
-
 
 --parsePlace :: String -> [String]
 --parsePlace []       = []
