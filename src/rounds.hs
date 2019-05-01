@@ -97,7 +97,7 @@ lexPlace 'x' = Just X
 lexPlace 'X' = Just X
 lexPlace '-' = Just X
 lexPlace p
-  | isNumber p = Just Call [toDigit p] 
+  | isNumber p = Just Call [digitToInt p] 
   | otherwise = Nothing
 
 data Palindrome = Palindrome
@@ -107,17 +107,6 @@ data PlaceNotation = Call | Palindrome
 lexPalindrome :: Char -> Maybe Palindrome
 lexPalindrome ',' = Palindrome
 lexPalindrome _ = Nothing
---parsePlace []       = []
---parsePlace ('.':ss) = [] : (parsePlace ss)
---parsePlace ('x':ss) =
---parsePlace ('X':ss) =
---parsePlace ('-':ss) =
--- Work out if this is valid place notation
---isPlaceNotation :: Char -> Bool
---isPlaceNotation char = any (char ==) "1234567890xX-.,"
-
---placeNotation = ReadP [String]
---placeNotation = do
 
 -- Parser Requirements:
 -- pNParse :: Int -> String -> [String]
