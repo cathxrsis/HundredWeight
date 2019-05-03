@@ -5,9 +5,13 @@ A Haskell library for proving change ringing methods.
 to print Grandsire Doubles, type the following into the GHCI REPL:
 
 > prelude >:l rounds.hs
+
 > main *> grand = ["3","1","5","1","5","1","5","1","5","1"]
+
 > main *> grandsire = grand ++ grand ++ grand
+
 > main *> putStr (printMethod (method 5 grandsire))
+
 
 ## Features
 
