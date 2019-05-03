@@ -33,14 +33,13 @@ minAbs (x:y:xs)
    | otherwise = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: Int -> Call -> Bell -> Maybe Bell
+evolve :: Int -> PlaceNotation -> Bell -> Maybe Bell
 evolve n X (Bell p q)
    | odd n = Nothing
    | odd p =  Just $ Bell (p+1) q
    | otherwise = Just $ Bell (p-1) q
 evolve _ (Change c) (Bell p q)
    | (foldOr $ map (\r -> r == p) c) = Just $ Bell p q -- If the bell is one of the places, keep its position the same.
- --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
    | otherwise = Just $ Bell p q
@@ -90,13 +89,17 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
-retChomp :: String -> Maybe (Char, String)
-retChomp [] = Nothing
-retChomp (s:ss) = Just (s, ss)
+catP :: (Maybe PlaceNotToken) -> [PlaceNotToken] -> [PlaceNotToken]
+catP Nothing ps = ps
+catP (Just p) ps = p : ps
 
-chomp :: (Char, String) -> (Char -> Maybe PlaceNotation) -> Maybe (Char, String)
-chomp [] _ = Nothing
-chomp (s:ss) f = Just ((f s), ss)
+retChomp :: String -> Maybe ([PlaceNotToken], String)
+retChomp [] = Nothing
+retChomp cs = Just ([], cs)
+
+chomp :: ([PlaceNotToken], String) -> (Char -> Maybe PlaceNotation) -> Maybe ([PlaceNotToken], String)
+chomp (_ ,[]) _ = Nothing
+chomp (ps, (c:cs)) f = Just ((catP (f c) ps), cs)
 
 lexPlace :: Char -> Maybe PlaceNotToken
 -- all change tokens
@@ -104,7 +107,7 @@ lexPlace 'x' = Just X
 lexPlace 'X' = Just X
 lexPlace '-' = Just X
 -- Palindrome token 
-lexPlace ',' = Palindrome
+lexPlace ',' = Just Palindrome
 -- call tokens
 lexPlace '.' = Just Dot
 lexPlace p
