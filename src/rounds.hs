@@ -7,11 +7,15 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
--- Change represents the set of bells that are to be changed.
-data Call = X | Change [Int] 
+-- PlaceNotation represents the parse tree for place notation
+data PlaceNotation = X | Change [Int] 
+
+-- PlaceNotToken represents the tokens for place notation parsing
+data PlaceNotToken = X | Palindrome | Place Int | Dot
 
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
+
 -- Places is a list of strings that each represent the notation for a change
 type Places = [String]
 
@@ -86,27 +90,31 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
-parsePlace :: String -> PlaceNotation 
+retChomp :: String -> Maybe (Char, String)
+retChomp [] = Nothing
+retChomp (s:ss) = Just (s, ss)
 
-chompStr :: String -> Maybe (Char, String)
-compStr [] = Nothing
-chompStr s:ss = Just (s, ss)
+chomp :: (Char, String) -> (Char -> Maybe PlaceNotation) -> Maybe (Char, String)
+chomp [] _ = Nothing
+chomp (s:ss) f = Just ((f s), ss)
 
-lexPlace :: Char -> Maybe Call
+lexPlace :: Char -> Maybe PlaceNotToken
+-- all change tokens
 lexPlace 'x' = Just X
 lexPlace 'X' = Just X
 lexPlace '-' = Just X
+-- Palindrome token 
+lexPlace ',' = Palindrome
+-- call tokens
+lexPlace '.' = Just Dot
 lexPlace p
-  | isNumber p = Just Call [digitToInt p] 
+  | isNumber p = Just $ Place $ digitToInt p
   | otherwise = Nothing
-
-data Palindrome = Palindrome
-data PlaceNotation = Call | Palindrome
 -- Must cope with numbers above 10 (0)
- 
-lexPalindrome :: Char -> Maybe Palindrome
-lexPalindrome ',' = Palindrome
-lexPalindrome _ = Nothing
+
+-- The above will not work as places are delimeted by full stops
+-- To fix this, seperate the lexer from the parser and make a lex tree.
+
 
 -- Parser Requirements:
 -- pNParse :: Int -> String -> [String]
