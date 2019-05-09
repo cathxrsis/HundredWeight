@@ -107,6 +107,9 @@ data PlaceNotation = Call | Palindrome
 lexPalindrome :: Char -> Maybe Palindrome
 lexPalindrome ',' = Palindrome
 lexPalindrome _ = Nothing
+
+data PNParse = PNParse [PlaceNotation] (char, String)
+
 --parsePlace []       = []
 --parsePlace ('.':ss) = [] : (parsePlace ss)
 --parsePlace ('x':ss) =
