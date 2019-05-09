@@ -7,11 +7,15 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
--- Change represents the set of bells that are to be changed.
-data Call = X | Change [Int] 
+-- PlaceNotation represents the parse tree for place notation
+data PlaceNotation = X | Change [Int] 
+
+-- PlaceNotToken represents the tokens for place notation parsing
+data PlaceNotToken = X | Palindrome | Place Int | Dot
 
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
+
 -- Places is a list of strings that each represent the notation for a change
 type Places = [String]
 
@@ -29,14 +33,13 @@ minAbs (x:y:xs)
    | otherwise = minAbs xs
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: Int -> Call -> Bell -> Maybe Bell
+evolve :: Int -> PlaceNotation -> Bell -> Maybe Bell
 evolve n X (Bell p q)
    | odd n = Nothing
    | odd p =  Just $ Bell (p+1) q
    | otherwise = Just $ Bell (p-1) q
 evolve _ (Change c) (Bell p q)
    | (foldOr $ map (\r -> r == p) c) = Just $ Bell p q -- If the bell is one of the places, keep its position the same.
- --map calculate c-p. foldl take the smallest modulus value. if positive and even go down. if negative and odd go down. else go up
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
    | otherwise = Just $ Bell p q
@@ -86,41 +89,33 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
 
-parsePlace :: String -> PlaceNotation 
+catP :: (Maybe PlaceNotToken) -> [PlaceNotToken] -> [PlaceNotToken]
+catP Nothing ps = ps
+catP (Just p) ps = p : ps
 
-chompStr :: String -> Maybe (Char, String)
-compStr [] = Nothing
-chompStr s:ss = Just (s, ss)
+retChomp :: String -> Maybe ([PlaceNotToken], String)
+retChomp [] = Nothing
+retChomp cs = Just ([], cs)
 
-lexPlace :: Char -> Maybe Call
+chomp :: ([PlaceNotToken], String) -> (Char -> Maybe PlaceNotation) -> Maybe ([PlaceNotToken], String)
+chomp (_ ,[]) _ = Nothing
+chomp (ps, (c:cs)) f = Just ((catP (f c) ps), cs)
+
+lexPlace :: Char -> Maybe PlaceNotToken
+-- all change tokens
 lexPlace 'x' = Just X
 lexPlace 'X' = Just X
 lexPlace '-' = Just X
+-- Palindrome token 
+lexPlace ',' = Just Palindrome
+-- call tokens
+lexPlace '.' = Just Dot
 lexPlace p
-  | isNumber p = Just Call [toDigit p] 
+  | isNumber p = Just $ Place $ digitToInt p
   | otherwise = Nothing
-
-data Palindrome = Palindrome
-data PlaceNotation = Call | Palindrome
 -- Must cope with numbers above 10 (0)
- 
-lexPalindrome :: Char -> Maybe Palindrome
-lexPalindrome ',' = Palindrome
-lexPalindrome _ = Nothing
-
-data PNParse = PNParse [PlaceNotation] (char, String)
-
---parsePlace []       = []
---parsePlace ('.':ss) = [] : (parsePlace ss)
---parsePlace ('x':ss) =
---parsePlace ('X':ss) =
---parsePlace ('-':ss) =
--- Work out if this is valid place notation
---isPlaceNotation :: Char -> Bool
---isPlaceNotation char = any (char ==) "1234567890xX-.,"
-
---placeNotation = ReadP [String]
---placeNotation = do
+-- The above will not work as places are delimeted by full stops
+-- To fix this, seperate the lexer from the parser and make a lex tree.
 
 -- Parser Requirements:
 -- pNParse :: Int -> String -> [String]
