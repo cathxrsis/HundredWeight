@@ -7,12 +7,6 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
--- PlaceNotation represents the parse tree for place notation
-data PlaceNotation = X | Change [Int] 
-
--- PlaceNotToken represents the tokens for place notation parsing
-data PlaceNotToken = X | Palindrome | Place Int | Dot
-
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
@@ -79,7 +73,7 @@ stage x = "Stage " ++ show x
 
 -- A bell is represented as its symbol
 charBell :: Bell -> Char
-charBell (Bell _ b) =  intToDigit b
+charBell (Bell _ b) =  intToDigit
 
 -- Print a row to a string
 printRow :: Row -> String
@@ -88,49 +82,6 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 -- Print each bell of the method
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
-
-catP :: (Maybe PlaceNotToken) -> [PlaceNotToken] -> [PlaceNotToken]
-catP Nothing ps = ps
-catP (Just p) ps = p : ps
-
-retChomp :: String -> Maybe ([PlaceNotToken], String)
-retChomp [] = Nothing
-retChomp cs = Just ([], cs)
-
-chomp :: ([PlaceNotToken], String) -> (Char -> Maybe PlaceNotation) -> Maybe ([PlaceNotToken], String)
-chomp (_ ,[]) _ = Nothing
-chomp (ps, (c:cs)) f = Just ((catP (f c) ps), cs)
-
-lexPlace :: Char -> Maybe PlaceNotToken
--- all change tokens
-lexPlace 'x' = Just X
-lexPlace 'X' = Just X
-lexPlace '-' = Just X
--- Palindrome token 
-lexPlace ',' = Just Palindrome
--- call tokens
-lexPlace '.' = Just Dot
-lexPlace p
-  | isNumber p = Just $ Place $ digitToInt p
-  | otherwise = Nothing
--- Must cope with numbers above 10 (0)
--- The above will not work as places are delimeted by full stops
--- To fix this, seperate the lexer from the parser and make a lex tree.
-
--- Parser Requirements:
--- pNParse :: Int -> String -> [String]
---  on numbers:
---    number <= stage = add to string
---    otherwise fail
---  on 'x/X':
---    end string and add "x" to listP
---  on '.':
---    end string, begin new one in listP
---  on ',':
---    end string, ++ reverse of listP onto listP then begin new on in listP
---  on [] :
---    end parse
-
 
 --Features to do
 -- Parser needs to parse changes into full notation
