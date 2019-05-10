@@ -40,13 +40,16 @@ lexPlace p
   | otherwise = Nothing
 -- Must cope with numbers above 12, test for alphabet and to upper it
 
-parsePlace :: ([PlaceNotation], [PlaceNotTok]) -> [PlaceNotation]
-parsePlace (pns, []) = pns
-parsePlace ((pns ++ [Change cs]), (Place c):ps) = parsePlace ((pns++[Change (cs ++ [c])]), ps)
-parsePlace ((pns ++ pn), (Palindrome : ps)) = ((pns ++ pn ++ (reverse pns)), ps)
-parsePlace (pns, (p:ps)) = parsePlace ((pns++[p]), ps)
--- Can only match on constructors, rewrite to remove ++ from patterns
+toPn :: PlaceNotTok -> PlaceNotation
+toPn Xtok = X
+toPn Place p = Change [p]
 
+parsePlace :: ([PlaceNotation], [PlaceNotTok]) -> [PlaceNotation]
+parsePlace (pns, []) = reverse pns
+parsePlace (((Change cs):pns), (Place c):ps) = parsePlace (((Change (c:cs)):pns), ps)
+parsePlace ((pn:pns), (Palindrome : ps)) = (((reverse pns) ++ pn ++ pns), ps)
+parsePlace (pns, (p:ps)) = parsePlace (((toPN p):pns), ps)
+-- Needs to cope with dots
 
 -- Parser Requirements:
 -- pNParse :: Int -> String -> [String]
