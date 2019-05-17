@@ -42,13 +42,13 @@ lexPlace p
 
 toPn :: PlaceNotTok -> PlaceNotation
 toPn Xtok = X
-toPn Place p = Change [p]
+toPn (Place p) = Change [p]
 
 parsePlace :: ([PlaceNotation], [PlaceNotTok]) -> [PlaceNotation]
 parsePlace (pns, []) = reverse pns
 parsePlace (((Change cs):pns), (Place c):ps) = parsePlace (((Change (c:cs)):pns), ps)
-parsePlace ((pn:pns), (Palindrome : ps)) = (((reverse pns) ++ pn ++ pns), ps)
-parsePlace (pns, (p:ps)) = parsePlace (((toPN p):pns), ps)
+parsePlace ((pn:pns), (Palindrome : ps)) = parsePlace (((reverse pns) ++ [pn] ++ pns), ps)
+parsePlace (pns, (p:ps)) = parsePlace (((toPn p):pns), ps)
 -- Needs to cope with dots
 
 -- Parser Requirements:
