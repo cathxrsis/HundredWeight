@@ -43,9 +43,14 @@ lexPlace p
 toPn :: PlaceNotTok -> PlaceNotation
 toPn Xtok = X
 toPn (Place p) = Change [p]
+toPn Dot = Change []
+
+retParsePlace :: [PlaceNotTok] -> ([PlaceNotation],[PlaceNotTok])
+retParsePlace p = ([], (reverse p))
 
 parsePlace :: ([PlaceNotation], [PlaceNotTok]) -> [PlaceNotation]
-parsePlace (pns, []) = reverse pns
+parsePlace (pns, []) = pns
+parsePlace (((Change []) : pns), ((Place x) : ps)) = parsePlace (((Change [x]) : pns),ps)
 parsePlace (((Change cs):pns), (Place c):ps) = parsePlace (((Change (c:cs)):pns), ps)
 parsePlace ((pn:pns), (Palindrome : ps)) = parsePlace (((reverse pns) ++ [pn] ++ pns), ps)
 parsePlace (pns, (p:ps)) = parsePlace (((toPn p):pns), ps)
