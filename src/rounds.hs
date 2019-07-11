@@ -7,6 +7,8 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
+-- PlaceNotation = X | Change [Int]
+
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
@@ -32,7 +34,7 @@ evolve n X (Bell p q)
    | odd n = Nothing
    | odd p =  Just $ Bell (p+1) q
    | otherwise = Just $ Bell (p-1) q
-evolve _ (Change c) (Bell p q)
+evolve _ (Change cs) (Bell p q)
    | (foldOr $ map (\r -> r == p) c) = Just $ Bell p q -- If the bell is one of the places, keep its position the same.
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
