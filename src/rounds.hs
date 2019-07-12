@@ -7,8 +7,6 @@ data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
 instance Eq Bell where
    Bell a _ == Bell b _ = a == b
 
--- PlaceNotation = X | Change [Int]
-
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
@@ -21,12 +19,10 @@ rounds 0 = []
 rounds x = [Bell x x] ++ rounds (x-1)
 
 -- finds the minimum absolute value from a list of integers (will pick first if two of equivalent abs value)
-minAbs :: [Int] -> Int
-minAbs (x:[]) = x
-minAbs (x:y:xs)
+minAbs :: Int -> Int -> Int
+minAbs x y
    | (abs x) <= (abs y) = x
-   | (abs y) <= (abs x) = y
-   | otherwise = minAbs xs
+   | otherwise = y
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
 evolve :: Int -> PlaceNotation -> Bell -> Maybe Bell
@@ -39,8 +35,10 @@ evolve _ (Change cs) (Bell p q)
    | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
    | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
    | otherwise = Just $ Bell p q
-   where cP = minAbs.(map (\r -> r-p)) --Find the closest bell making a place to our bell
+   where cP = foldMinAbs.(map (\r -> r-p)) --Find the closest bell making a place to our bell
          foldOr = foldl (||) False
+         foldMinAbs = foldl (`minAbs`) 36
+
 --Requires cases for:
 -- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
 -- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
