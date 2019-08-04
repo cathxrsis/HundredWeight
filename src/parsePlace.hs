@@ -1,18 +1,25 @@
 {- © Tom Westbury (Cathxrsis) tomwestbury1@gmail.com
  - Changes.Parser => A parser for change ringing place notation
- - This module provides a 
+ - This module provides
  -
  -}
+
+
+-- module Changes.Parser
+-- ( PlaceNotation
+-- , parsePlaceNotation
+-- ) where
+
+import rounds
 import Data.Char
 import Data.List
+import Control.Applicative
+import Text.Parsec
+import Text.ParserCombinators.Parsec
 
-module Changes.Parser
-( PlaceNotation
-, parsePlaceNotation 
-) where
-
--- PlaceNotation represents the parse tree for place notation
-data PlaceNotation = X | Change [Int] deriving Show
+-- Handy shorthand
+(<||>) :: (Applicative a) => a -> a -> a
+(<||>) x y = (try x) <|> y
 
 -- PlaceNotTok represents the Toks for place notation parsing
 data PlaceNotTok = Xtok | Palindrome | Place Int | Dot deriving Show
@@ -35,7 +42,7 @@ chompLex = chomp lexPlace
 
 -- Create tokens for all of the lexy things but ignore errors
 lexPlace :: Char -> [PlaceNotTok]
--- all change tokens 
+-- all change tokens
 lexPlace 'x' = Xtok : []
 lexPlace 'X' = Xtok : []
 lexPlace '-' = Xtok : []
@@ -54,7 +61,8 @@ lexPlace p
 -- Must cope with numbers above 12, test for alphabet and to upper it
 
 -- Helper function to turn tokens into place notation
-toPn :: PlaceNotTok -> PlaceNotation
+toPn :: PlaceNotTok -> parsePlace (pns, (p:ps)) = parsePlace (((toPn p):pns), ps)
+PlaceNotation
 toPn Xtok = X
 toPn (Place p) = Change [p]
 toPn Dot = Change []
@@ -70,3 +78,19 @@ parsePlace (((Change []) : pns), ((Place x) : ps)) = parsePlace (((Change [x]) :
 parsePlace (((Change cs):pns), (Place c):ps) = parsePlace (((Change (c:cs)):pns), ps)
 parsePlace ((pn:pns), (Palindrome : ps)) = parsePlace (((reverse pns) ++ [pn] ++ pns), ps)
 parsePlace (pns, (p:ps)) = parsePlace (((toPn p):pns), ps)
+
+-- Parser tree for bellringing place Notation
+
+placeNotationParser = do
+  places <- palindromeParser <||> placesParser
+  return places
+
+palindromeParser = do
+  palindrome <-
+  leadEnd <- placeParser
+  return
+
+placesParser = do
+  placeParser
+
+placeParser = 

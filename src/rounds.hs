@@ -1,5 +1,20 @@
+{- © Tom Westbury (Cathxrsis) tomwestbury1@gmail.com
+ - Changes.Eval => An Evaluator for change ringing
+ - This module provides
+ -
+ -}
+
+module Changes.Core
+  (Place Notation
+  ,
+  ) where
+
 import Data.Char
 import Data.List
+import Control.Applicative
+
+-- PlaceNotation represents the parse tree for place notation
+data PlaceNotation = X | Change [Int] deriving Show
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -10,8 +25,11 @@ instance Eq Bell where
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
--- Places is a list of strings that each represent the notation for a change
-type Places = [String]
+checkFalse :: Row -> Row -> Either String Row
+-- Checks if a Row is false by comparing the row to a list of rows
+checkFalse (r:rs) (s:ss)
+   | r == s
+   | otherwise
 
 -- rounds constructs a row of bells in the same position as their number
 rounds :: Int -> Row
@@ -25,20 +43,24 @@ minAbs x y
    | otherwise = y
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: Int -> PlaceNotation -> Bell -> Maybe Bell
-evolve n X (Bell p q)
-   | odd n = Nothing
-   | odd p =  Just $ Bell (p+1) q
-   | otherwise = Just $ Bell (p-1) q
-evolve _ (Change cs) (Bell p q)
-   | (foldOr $ map (\r -> r == p) c) = Just $ Bell p q -- If the bell is one of the places, keep its position the same.
-   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Just $ Bell (p+1) q
-   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Just $ Bell (p-1) q
-   | otherwise = Just $ Bell p q
+evolve :: PlaceNotation -> Bell -> Bell
+evolve X (Bell p q)
+   | odd p =  Bell (p+1) q
+   | otherwise = Bell (p-1) q
+evolve (Change cs) (Bell p q)
+   | (foldOr $ map (\r -> r == p) c) = Bell p q -- If the bell is one of the places, keep its position the same.
+   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
+   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
+   | otherwise = Bell p q
    where cP = foldMinAbs.(map (\r -> r-p)) --Find the closest bell making a place to our bell
          foldOr = foldl (||) False
          foldMinAbs = foldl (`minAbs`) 36
 
+checkPlaceNotation :: Int -> PlaceNotation -> Either String PlaceNotation
+checkPlaceNotation n X
+   | odd n = Left "All change used in odd stage."
+   | otherwise = Right X
+checkPlaceNotation n pn
 --Requires cases for:
 -- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
 -- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
