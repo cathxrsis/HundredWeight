@@ -92,18 +92,6 @@ stage 12 = "Maximus"
 stage 13 = "Sextuples"
 stage x = "Stage " ++ show x
 
--- A bell is represented as its symbol
-charBell :: Bell -> Char
-charBell (Bell _ b) =  intToDigit
-
--- Print a row to a string
-printRow :: Row -> String
-printRow r = ((map charBell) $ sort r) ++ ['\n']
-
--- Print each bell of the method
-printMethod :: [Row] -> String
-printMethod m = foldl (++) [] (map printRow m)
-
 --Features to do
 -- Parser needs to parse changes into full notation
 -- GUI
