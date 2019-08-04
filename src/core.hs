@@ -1,10 +1,10 @@
 {- © Tom Westbury (Cathxrsis) tomwestbury1@gmail.com
- - Changes.Eval => An Evaluator for change ringing
+ - HundredWeight.Core => An Evaluator for change ringing
  - This module provides
  -
  -}
 
-module Changes.Core
+module HundredWeight.Core
   (Place Notation
   ,
   ) where
