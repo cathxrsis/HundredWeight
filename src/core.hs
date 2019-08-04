@@ -1,4 +1,4 @@
-{- © Tom Westbury (Cathxrsis) tomwestbury1@gmail.com
+{- © Tom Westbury (cathxrsis) tomwestbury1@gmail.com
  - HundredWeight.Core => An Evaluator for change ringing
  - This module provides
  -
@@ -11,7 +11,6 @@ module HundredWeight.Core
 
 import Data.Char
 import Data.List
-import Control.Applicative
 
 -- PlaceNotation represents the parse tree for place notation
 data PlaceNotation = X | Change [Int] deriving Show

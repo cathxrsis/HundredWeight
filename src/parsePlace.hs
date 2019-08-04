@@ -1,16 +1,16 @@
-{- © Tom Westbury (Cathxrsis) tomwestbury1@gmail.com
- - Changes.Parser => A parser for change ringing place notation
+{- © Tom Westbury (cathxrsis) tomwestbury1@gmail.com
+ - HundredWeight.Parser => A parser for change ringing place notation
  - This module provides
  -
  -}
 
 
--- module Changes.Parser
--- ( PlaceNotation
--- , parsePlaceNotation
--- ) where
+module HundredWeight.Parser
+(
+,
+) where
 
-import rounds
+import HundredWeight.Core
 import Data.Char
 import Data.List
 import Control.Applicative
@@ -80,17 +80,3 @@ parsePlace ((pn:pns), (Palindrome : ps)) = parsePlace (((reverse pns) ++ [pn] ++
 parsePlace (pns, (p:ps)) = parsePlace (((toPn p):pns), ps)
 
 -- Parser tree for bellringing place Notation
-
-placeNotationParser = do
-  places <- palindromeParser <||> placesParser
-  return places
-
-palindromeParser = do
-  palindrome <-
-  leadEnd <- placeParser
-  return
-
-placesParser = do
-  placeParser
-
-placeParser = 
