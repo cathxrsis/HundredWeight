@@ -1,10 +1,10 @@
-name:                changes
+name:                HundredWeight
 version:             0.1.0.0
-github:              "githubuser/changes"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+github:              "cathxrsis/HundredWeight"
+license:             GPL
+author:              "Tom Westbury"
+maintainer:          "tomwestbury1@gmail.com.com"
+copyright:           "2019 Tom Westbury"
 
 extra-source-files:
 - README.md

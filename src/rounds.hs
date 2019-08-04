@@ -4,17 +4,12 @@
  -
  -}
 
-module Changes.Core
-  (Place Notation
-  ,
-  ) where
-
 import Data.Char
 import Data.List
-import Control.Applicative
+-- import Control.Applicative
 
 -- PlaceNotation represents the parse tree for place notation
-data PlaceNotation = X | Change [Int] deriving Show
+data Places = X | Change [Int] deriving Show
 
 -- Bell represents a bell's position and its number. Ordered by first number.
 data Bell = Bell {pos :: Int, sym :: Int} deriving (Ord, Show)
@@ -25,11 +20,9 @@ instance Eq Bell where
 -- row is a row on a blue line, as a list of bells
 type Row = [Bell]
 
-checkFalse :: Row -> Row -> Either String Row
--- Checks if a Row is false by comparing the row to a list of rows
-checkFalse (r:rs) (s:ss)
-   | r == s
-   | otherwise
+changeFromChar :: [Char] -> Places
+-- Dangerous fn for testing, will be replaced by a safe Parser
+changeFromChar [c] = Change [digitToInt c]
 
 -- rounds constructs a row of bells in the same position as their number
 rounds :: Int -> Row
@@ -43,39 +36,30 @@ minAbs x y
    | otherwise = y
 
 -- evolve takes in the stage the parsed place notation and a bell and produces Just a bell or Nothing.
-evolve :: PlaceNotation -> Bell -> Bell
+evolve :: Places -> Bell -> Bell
 evolve X (Bell p q)
    | odd p =  Bell (p+1) q
    | otherwise = Bell (p-1) q
 evolve (Change cs) (Bell p q)
-   | (foldOr $ map (\r -> r == p) c) = Bell p q -- If the bell is one of the places, keep its position the same.
-   | ((even $ cP c) && ((cP c) > 0)) || ((odd $ cP c) && ((cP c) < 0)) = Bell (p+1) q
-   | ((odd $ cP c) && ((cP c) > 0)) || ((even $ cP c) && ((cP c) < 0)) = Bell (p-1) q
+   | (foldOr $ map (\r -> r == p) cs) = Bell p q -- If the bell is one of the places, don't swap
+   | ((even $ cP cs) && ((cP cs) > 0)) || ((odd $ cP cs) && ((cP cs) < 0)) = Bell (p+1) q
+   | ((odd $ cP cs) && ((cP cs) > 0)) || ((even $ cP cs) && ((cP cs) < 0)) = Bell (p-1) q
    | otherwise = Bell p q
    where cP = foldMinAbs.(map (\r -> r-p)) --Find the closest bell making a place to our bell
          foldOr = foldl (||) False
-         foldMinAbs = foldl (`minAbs`) 36
-
-checkPlaceNotation :: Int -> PlaceNotation -> Either String PlaceNotation
-checkPlaceNotation n X
-   | odd n = Left "All change used in odd stage."
-   | otherwise = Right X
-checkPlaceNotation n pn
---Requires cases for:
--- When in stage n and bell (n-odd.closestPlace $ c) makes places, bell n must make places
--- When bell (1 + odd.closestPlace $ c) makes places then 1 must make places (but not if there is an (1+even)<(1+odd))
+         foldMinAbs = foldl (minAbs) 36
 
 -- Generate a list of bells from a row
-change :: Int -> String -> Row -> Row
-change n s r = map (evolve n s) r
+change :: Places -> Row -> Row
+change s r = map (evolve s) r
 
 -- Generate non rounds method
-methodNon :: Int -> Places -> Row -> [Row]
+methodNon :: Int -> [Places] -> Row -> [Row]
 methodNon n [] r = []
-methodNon n (p:ps) r = (change n p r) : methodNon n ps (change n p r)
+methodNon n (p:ps) r = (change p r) : methodNon n ps (change p r)
 
 -- Start from rounds
-method :: Int -> Places -> [Row]
+method :: Int -> [Places] -> [Row]
 method a b = (methodNon a b) $ (rounds a)
 
 stage :: Int -> String
@@ -95,7 +79,7 @@ stage x = "Stage " ++ show x
 
 -- A bell is represented as its symbol
 charBell :: Bell -> Char
-charBell (Bell _ b) =  intToDigit
+charBell (Bell _ b) = intToDigit b
 
 -- Print a row to a string
 printRow :: Row -> String
@@ -104,11 +88,3 @@ printRow r = ((map charBell) $ sort r) ++ ['\n']
 -- Print each bell of the method
 printMethod :: [Row] -> String
 printMethod m = foldl (++) [] (map printRow m)
-
---Features to do
--- Parser needs to parse changes into full notation
--- GUI
--- Check and highlight falseness (give row and highlight)
--- Allow for composing blocks of place notation
--- Allow for bob, single, plain and more exciting blocks
--- Allow for block composition

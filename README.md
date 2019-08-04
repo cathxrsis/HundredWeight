@@ -1,5 +1,6 @@
-# Changes
+# HundredWeight
 A Haskell library for proving change ringing methods.
+
 [![Build Status](https://travis-ci.org/cathxrsis/changes.svg?branch=master)](https://travis-ci.org/cathxrsis/changes)
 
 # Example
@@ -11,7 +12,7 @@ to print Grandsire Doubles, type the following into the GHCI REPL:
 
 > main *> grandsire = grand ++ grand ++ grand
 
-> main *> putStr (printMethod (method 5 grandsire))
+> main *> putStr (printMethod (method 5 (map (changeFromChar) grandsire)))
 
 
 ## Features
