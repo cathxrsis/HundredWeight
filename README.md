@@ -1,5 +1,6 @@
 # Changes
 A Haskell library for proving change ringing methods.
+[![Build Status](https://travis-ci.org/cathxrsis/changes.svg?branch=master)](https://travis-ci.org/cathxrsis/changes)
 
 # Example
 to print Grandsire Doubles, type the following into the GHCI REPL:
